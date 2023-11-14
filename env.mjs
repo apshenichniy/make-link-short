@@ -11,6 +11,5 @@ export const env = createEnv({
     UPSTASH_REDIS_REST_URL: z.string().url(),
     UPSTASH_REDIS_REST_TOKEN: z.string(),
   },
-  //client: {},
   runtimeEnv: process.env,
 })
