@@ -1,12 +1,15 @@
+import { visitShortlink } from "@/lib/actions";
+import { permanentRedirect } from "next/navigation";
+
 interface SlugPageProps {
   params: {
-    slug: string[]
-  }
+    slug: string[];
+  };
 }
 
-export default function SlugPage({ params: { slug } }: SlugPageProps) {
-  const shortLink = slug[0]
-  console.log(shortLink)
+export default async function SlugPage({ params: { slug } }: SlugPageProps) {
+  const linkId = slug[0];
+  const url = await visitShortlink(linkId);
 
-  return <div>Link: {shortLink}</div>
+  permanentRedirect(url);
 }

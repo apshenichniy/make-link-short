@@ -29,7 +29,6 @@ const CreateLinkForm = () => {
     resolver: zodResolver(FormSchema),
   });
   const [isPending, startTransition] = useTransition();
-  const [isLinkPopupOpen, setLinkPopupOpen] = useState(false);
   const [isSettingsCollapsed, setSettingsCollapsed] = useState(true);
   const { mutate } = useCreateShortlink();
   const [link, setLink] = useState<string | undefined>();

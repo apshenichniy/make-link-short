@@ -1,31 +1,39 @@
 "use client";
 
+import { env } from "@/env.mjs";
 import { signInAndSaveLink } from "@/lib/actions";
+import copy from "copy-to-clipboard";
 import { Copy, Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect, useState, useTransition } from "react";
 import QRCode from "react-qr-code";
 import { Button } from "./ui/button";
 import { Dialog, DialogClose, DialogContent, DialogTitle } from "./ui/dialog";
+import { useToast } from "./ui/use-toast";
 
 interface LinkViewPopupProps {
   link?: string;
-  //   open: boolean;
-  //   onOpenChange: (open: boolean) => void;
 }
 
-const LinkViewPopup: React.FC<LinkViewPopupProps> = ({
-  link,
-  //   open,
-  //   onOpenChange,
-}) => {
+const LinkViewPopup: React.FC<LinkViewPopupProps> = ({ link }) => {
   const [open, setOpen] = useState(!!link);
   const { status } = useSession();
   const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
 
   useEffect(() => {
     setOpen(!!link);
   }, [link]);
+
+  const handleCopy = () => {
+    if (!link) return;
+    const copied = copy(fullShortLink);
+    if (copied) {
+      toast({ title: "Short link copied!" });
+    }
+  };
+
+  const fullShortLink = `${env.NEXT_PUBLIC_APP_URL}/${link}`;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -38,14 +46,19 @@ const LinkViewPopup: React.FC<LinkViewPopupProps> = ({
         </DialogTitle>
         <div className="flex items-center">
           <code className="grow relative rounded bg-muted px-3 py-1 font-mono text-sm font-semibold">
-            https://www.long-long-long.vercel.com/12345
+            {fullShortLink}
           </code>
-          <Button size="icon" variant="ghost" className="hover:bg-transparent">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="hover:bg-transparent"
+            onClick={handleCopy}
+          >
             <Copy className="w-5 h-5" />
           </Button>
         </div>
         <div className="justify-center flex py-3">
-          <QRCode value="my_link" />
+          <QRCode value={fullShortLink} />
         </div>
         {status === "unauthenticated" && (
           <div className="flex flex-col space-y-3">

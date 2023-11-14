@@ -5,6 +5,7 @@ import { hash } from "bcrypt-ts";
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { notFound } from "next/navigation";
 import { getCachedStats } from "./data";
 import { db } from "./db";
 import { shortLinks } from "./db/schema";
@@ -51,6 +52,32 @@ export const getShortlinks = async () => {
 export const updateShortlinkUser = async (linkId: string, userId: string) => {
   await db
     .update(shortLinks)
-    .set({ userId: userId })
+    .set({ userId: userId, updatedAt: new Date() })
     .where(eq(shortLinks.id, linkId));
+};
+
+export const findShortlink = async (linkId: string) => {
+  return db.select().from(shortLinks).where(eq(shortLinks.id, linkId));
+};
+
+export const visitShortlink = async (linkId: string) => {
+  const res = await db
+    .select()
+    .from(shortLinks)
+    .where(eq(shortLinks.id, linkId));
+
+  if (res.length === 0) {
+    notFound();
+  }
+
+  const { url, visits } = res[0];
+  await db
+    .update(shortLinks)
+    .set({ visits: visits + 1, lastVisit: new Date() })
+    .where(eq(shortLinks.id, linkId));
+
+  await redis.incr("stat:visits");
+  revalidatePath("/");
+
+  return url;
 };
