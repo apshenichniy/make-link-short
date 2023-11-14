@@ -2,13 +2,16 @@
 
 import { auth, signIn } from "@/lib/auth";
 
-import { hash } from "bcrypt-ts";
+import { compare, hash } from "bcrypt-ts";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { permanentRedirect } from "next/navigation";
 import { getCachedStats } from "./data";
 import { db } from "./db";
 import { shortLinks } from "./db/schema";
 import { redis } from "./redis";
+
+export type ShortlinkData = typeof shortLinks.$inferSelect;
 
 export const signInAndSaveLink = async (linkId: string) => {
   await signIn("github", { redirectTo: `/api/auth/save-link?link=${linkId}` });
@@ -55,14 +58,21 @@ export const updateShortlinkUser = async (linkId: string, userId: string) => {
 };
 
 export const findShortlink = async (linkId: string) => {
-  const res = await db
+  // find in cache
+  const cached = await redis.get<ShortlinkData>(linkId);
+  if (cached) return cached;
+
+  const fetched = await db
     .select()
     .from(shortLinks)
     .where(eq(shortLinks.id, linkId));
 
-  if (res.length === 0) return undefined;
+  if (fetched.length === 0) return undefined;
 
-  return res[0];
+  // cache it
+  await redis.set(linkId, fetched[0]);
+
+  return fetched[0];
 };
 
 export const updateShortlinkVisits = async (linkId: string, visits: number) => {
@@ -72,5 +82,16 @@ export const updateShortlinkVisits = async (linkId: string, visits: number) => {
     .where(eq(shortLinks.id, linkId));
 
   await redis.incr("stat:visits");
-  revalidatePath("/");
+};
+
+export const processProtectedLink = async (
+  password: string,
+  shortLink: ShortlinkData
+) => {
+  if (!shortLink.password) throw new Error("Password not set");
+  const isValid = await compare(password, shortLink.password);
+  if (!isValid) return { error: "Password is wrong. Try again." };
+
+  updateShortlinkVisits(shortLink.id, shortLink.visits + 1);
+  permanentRedirect(shortLink.url);
 };
