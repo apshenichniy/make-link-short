@@ -1,5 +1,7 @@
 import "server-only";
 
+import { eq } from "drizzle-orm";
+import { auth } from "./auth";
 import { db } from "./db";
 import { shortLinks, users as usersTable } from "./db/schema";
 import { redis } from "./redis";
@@ -40,4 +42,14 @@ export const fetchStats = async () => {
 
 export const incrementUsers = async (count: number = 1) => {
   redis.incrby("stat:users", count);
+};
+
+export const getShortlinks = async () => {
+  const session = await auth();
+  if (!session?.user) throw new Error("Session not found");
+
+  return db
+    .select()
+    .from(shortLinks)
+    .where(eq(shortLinks.userId, session.user.id));
 };

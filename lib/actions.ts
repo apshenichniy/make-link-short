@@ -76,12 +76,13 @@ export const findShortlink = async (linkId: string) => {
 };
 
 export const updateShortlinkVisits = async (linkId: string, visits: number) => {
-  await db
-    .update(shortLinks)
-    .set({ visits, lastVisit: new Date() })
-    .where(eq(shortLinks.id, linkId));
-
-  await redis.incr("stat:visits");
+  await Promise.all([
+    db
+      .update(shortLinks)
+      .set({ visits, lastVisit: new Date() })
+      .where(eq(shortLinks.id, linkId)),
+    redis.incr("stat:visits"),
+  ]);
 };
 
 export const processProtectedLink = async (
@@ -89,9 +90,22 @@ export const processProtectedLink = async (
   shortLink: ShortlinkData
 ) => {
   if (!shortLink.password) throw new Error("Password not set");
+
   const isValid = await compare(password, shortLink.password);
   if (!isValid) return { error: "Password is wrong. Try again." };
 
   updateShortlinkVisits(shortLink.id, shortLink.visits + 1);
   permanentRedirect(shortLink.url);
+};
+
+export const deleteShortlink = async (linkId: string) => {
+  const { rowCount } = await db
+    .delete(shortLinks)
+    .where(eq(shortLinks.id, linkId));
+
+  if (rowCount > 0) {
+    // delete from cache and update stat
+    await Promise.all([redis.del(linkId), redis.decr("stat:links")]);
+  }
+  revalidatePath("/");
 };

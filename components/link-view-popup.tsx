@@ -13,9 +13,10 @@ import { useToast } from "./ui/use-toast";
 
 interface LinkViewPopupProps {
   link?: string;
+  onClose?: () => void;
 }
 
-const LinkViewPopup: React.FC<LinkViewPopupProps> = ({ link }) => {
+const LinkViewPopup: React.FC<LinkViewPopupProps> = ({ link, onClose }) => {
   const [open, setOpen] = useState(!!link);
   const { status } = useSession();
   const [isPending, startTransition] = useTransition();
@@ -36,7 +37,13 @@ const LinkViewPopup: React.FC<LinkViewPopupProps> = ({ link }) => {
   const fullShortLink = `${env.NEXT_PUBLIC_APP_URL}/${link}`;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(value) => {
+        setOpen(value);
+        onClose?.();
+      }}
+    >
       <DialogContent
         className="flex flex-col w-fit"
         onPointerDownOutside={(e) => e.preventDefault()}

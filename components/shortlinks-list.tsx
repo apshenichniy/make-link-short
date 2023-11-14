@@ -1,15 +1,21 @@
-"use client";
+import { getShortlinks } from "@/lib/data";
+import { Shortlink } from "./shortlink";
 
-import { useGetShortlinks } from "@/lib/use-shortlinks";
-import { Loader2 } from "lucide-react";
+const ShortlinksList = async () => {
+  const shortLinks = await getShortlinks();
 
-const ShortlinksList = () => {
-  const { isPending, data } = useGetShortlinks();
+  if (shortLinks.length === 0) return null;
 
-  if (isPending)
-    return <Loader2 className="self-center m-6 h-8 w-8 animate-spin" />;
-
-  return <div className="flex flex-col">links list</div>;
+  return (
+    <div className="flex flex-col mt-8">
+      <h2 className="text-2xl font-semibold tracking-tight">Your shortlinks</h2>
+      <div className="flex flex-col space-y-4 mt-2">
+        {shortLinks?.map((link) => (
+          <Shortlink link={link} key={link.id} />
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export { ShortlinksList };

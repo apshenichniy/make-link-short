@@ -35,22 +35,24 @@ const FormSchema = z
     password: z.string().optional(),
     confirm: z.string().optional(),
     expirationDate: z.date().optional(),
-    expirationTime: z.object({
-      hours: z
-        .string()
-        .optional()
-        .refine(
-          (hours) => !hours || (+hours >= 0 && +hours <= 23),
-          "Invalid hours"
-        ),
-      minutes: z
-        .string()
-        .optional()
-        .refine(
-          (minutes) => !minutes || (+minutes >= 0 && +minutes <= 59),
-          "Invalid minutes"
-        ),
-    }),
+    expirationTime: z
+      .object({
+        hours: z
+          .string()
+          .optional()
+          .refine(
+            (hours) => !hours || (+hours >= 0 && +hours <= 23),
+            "Invalid hours"
+          ),
+        minutes: z
+          .string()
+          .optional()
+          .refine(
+            (minutes) => !minutes || (+minutes >= 0 && +minutes <= 59),
+            "Invalid minutes"
+          ),
+      })
+      .default({}),
   })
   .refine(({ password, confirm }) => password === confirm, {
     message: "Passwords don't match",
@@ -110,7 +112,7 @@ const CreateLinkForm = () => {
     if (Object.keys(errors).length > 0 && !isSettingsOpened) {
       setSettingsOpened(true);
     }
-  }, [errors]);
+  }, [errors, isSettingsOpened]);
 
   return (
     <Form {...form}>
