@@ -5,7 +5,6 @@ import { auth, signIn } from "@/lib/auth";
 import { hash } from "bcrypt-ts";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { notFound } from "next/navigation";
 import { getCachedStats } from "./data";
 import { db } from "./db";
 import { shortLinks } from "./db/schema";
@@ -35,7 +34,6 @@ export const createShortLink = async (data: typeof shortLinks.$inferInsert) => {
 
   // increment stat
   await redis.incr("stat:links");
-
   revalidatePath("/");
 };
 
@@ -57,27 +55,22 @@ export const updateShortlinkUser = async (linkId: string, userId: string) => {
 };
 
 export const findShortlink = async (linkId: string) => {
-  return db.select().from(shortLinks).where(eq(shortLinks.id, linkId));
-};
-
-export const visitShortlink = async (linkId: string) => {
   const res = await db
     .select()
     .from(shortLinks)
     .where(eq(shortLinks.id, linkId));
 
-  if (res.length === 0) {
-    notFound();
-  }
+  if (res.length === 0) return undefined;
 
-  const { url, visits } = res[0];
+  return res[0];
+};
+
+export const updateShortlinkVisits = async (linkId: string, visits: number) => {
   await db
     .update(shortLinks)
-    .set({ visits: visits + 1, lastVisit: new Date() })
+    .set({ visits, lastVisit: new Date() })
     .where(eq(shortLinks.id, linkId));
 
   await redis.incr("stat:visits");
   revalidatePath("/");
-
-  return url;
 };
