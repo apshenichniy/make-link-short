@@ -58,7 +58,7 @@ export default async function Home() {
               <span className="sr-only">GitHub</span>
             </div>
           </Link>
-          Created with:
+          Built with:
           <span className="ml-2 text-primary-foreground">
             Next.js, Drizzle ORM, NeonTech PosgreSQL, Upstash Redis, Shadcn UI
           </span>

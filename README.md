@@ -1,3 +1,25 @@
+## [Make Link Short!](https://make-link-short.vercel.app)
+
+This is a minimalistic URL shortener implemented as a small pet project just for fun and it took only two evenings to develop. It's open sourced, so you can fork, deploy, and use it.
+
+### Features
+
+- Authentication with Github
+- A personal links list
+- Password-protected links
+- Links with expiration date/time
+- Statistics on users, created shortlinks, and total visits
+
+### Built with
+
+- [Next.js 14 App Router](https://nextjs.org)
+- [Drizzle ORM](https://orm.drizzle.team) 🇺🇦
+- [Neon.Tech](https://neon.tech) serverless PostgreSQL DB
+- [Upstash Redis](https://upstash.com) serverless Redis (for caching links and statistics)
+- [shadcn/ui](https://ui.shadcn.com) beatiful React components
+
+---
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
