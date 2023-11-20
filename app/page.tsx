@@ -59,8 +59,46 @@ export default async function Home() {
             </div>
           </Link>
           Built with:
-          <span className="ml-2 text-primary-foreground">
-            Next.js, Drizzle ORM, NeonTech PosgreSQL, Upstash Redis, Shadcn UI
+          <span className="ml-2 text-foreground">
+            <Link
+              href="https://nextjs.org"
+              target="_blank"
+              referrerPolicy="no-referrer"
+            >
+              Next.js
+            </Link>
+            ,{" "}
+            <Link
+              href="https://orm.drizzle.team"
+              target="_blank"
+              referrerPolicy="no-referrer"
+            >
+              Drizzle ORM
+            </Link>
+            ,{" "}
+            <Link
+              href="https://neon.tech"
+              target="_blank"
+              referrerPolicy="no-referrer"
+            >
+              NeonTech PostgreSQL
+            </Link>
+            ,{" "}
+            <Link
+              href="https://upstash.com/"
+              target="_blank"
+              referrerPolicy="no-referrer"
+            >
+              Upstash Redis
+            </Link>
+            ,{" "}
+            <Link
+              href="https://ui.shadcn.com/"
+              target="_blank"
+              referrerPolicy="no-referrer"
+            >
+              Shadcn UI
+            </Link>
           </span>
         </footer>
       </div>
